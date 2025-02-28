@@ -32,7 +32,7 @@ public class WebSecurityConfig {
         
         // API Gateway의 origin 허용
         configuration.setAllowedOrigins(Arrays.asList(
-            "http://localhost:8080",    // API Gateway
+            "http://34.210.11.121:8080",    // API Gateway
             "http://localhost:3000"     // React
         ));
         

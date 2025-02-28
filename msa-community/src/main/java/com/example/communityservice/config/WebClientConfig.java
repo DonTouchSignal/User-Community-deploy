@@ -9,7 +9,7 @@ public class WebClientConfig {
     @Bean
     public WebClient webClient() {
         return WebClient.builder()
-            .baseUrl("http://localhost:8080")  // 게이트웨이 주소로 수정
+            .baseUrl("http://34.210.11.121:8080")  // 게이트웨이 주소로 수정
             .build();
     }
 } 

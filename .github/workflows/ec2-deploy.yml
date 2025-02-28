@@ -93,5 +93,7 @@ jobs:
             # 로그 확인
             sleep 5
             docker ps
-            docker logs msa-user
-            docker logs msa-community
+            CONTAINER_USER=$(docker ps --format '{{.Names}}' | grep msa-user)
+            CONTAINER_COMMUNITY=$(docker ps --format '{{.Names}}' | grep msa-community)
+            docker logs $CONTAINER_USER || true
+            docker logs $CONTAINER_COMMUNITY || true
