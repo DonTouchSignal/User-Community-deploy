@@ -86,10 +86,6 @@ jobs:
             # 서비스 배포 및 실행
             cd /home/$USER/app
             
-            # Dockerfile 수정하여 올바른 경로 설정
-            sed -i 's|COPY build/libs/|COPY msa-user/build/libs/|g' msa-user/Dockerfile
-            sed -i 's|COPY build/libs/|COPY msa-community/build/libs/|g' msa-community/Dockerfile
-            
             # 이전 서비스 중지 및 새 서비스 시작
             docker-compose down
             docker-compose up -d --build
