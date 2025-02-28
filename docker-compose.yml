@@ -1,7 +1,9 @@
 version: '3.7'
 services:
   msa-user:
-    build: ./msa-user
+    build:
+      context: .
+      dockerfile: ./msa-user/Dockerfile
     ports:
       - "8088:8088"
     environment:
@@ -10,7 +12,9 @@ services:
       - msa-network
 
   msa-community:
-    build: ./msa-community
+    build:
+      context: .
+      dockerfile: ./msa-community/Dockerfile
     ports:
       - "8081:8081"
     environment:
