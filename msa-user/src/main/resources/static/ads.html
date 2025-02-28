@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Ads Control</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        /* 일반 광고 영역 */
+        #ads {
+            border: 2px dashed #888;
+            padding: 20px;
+            margin-top: 20px;
+             /* 광고는 기본적으로 숨김 */
+            background-color: #f9f9f9;
+        }
+        #ads img {
+            max-width: 100%;
+        }
+        .hidden {
+            display: none;
+        }
+
+        /* 팝업 광고 스타일 */
+        #adPopup {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        #adPopup img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        #closeBtn {
+            margin-top: 10px;
+            cursor: pointer;
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        #paymentBtn {
+            margin-top: 10px;
+            cursor: pointer;
+            background: white;
+            color: black;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<h1>Subscription-Based Ad Control</h1>
+<p>Enter your username to check if ads should be displayed:</p>
+<div>
+    <label for="username">Username:</label>
+    <input type="text" id="username" placeholder="Enter your username" />
+    <button id="CheckAds">Check Ads</button>
+</div>
+
+<!-- 일반 광고 영역 -->
+<div id="ads" class="hidden">
+    <h2>Sponsored Content</h2>
+    <img src="https://via.placeholder.com/300x200" alt="Ad image">
+    <p>This is an example advertisement. Upgrade your subscription to remove ads!</p>
+</div>
+
+<!-- 팝업 광고 영역 -->
+<div id="adPopup">
+    <img id="adImage" src="" alt="광고 이미지">
+    <h3 id="adTitle"></h3>
+    <p id="adContent"></p>
+    <a id="adLink" href="#" target="_blank">자세히 보기</a>
+    <button id="closeBtn">닫기</button>
+    <button id="paymentBtn">결제</button>
+</div>
+
+<script>
+    // 광고 표시 함수
+    function displayAds() {
+        $("#ads").removeClass("hidden").fadeIn(); // 일반 광고 표시
+    }
+
+    // 광고 제거 함수
+    function removeAds() {
+        $("#ads").addClass("hidden").fadeOut(); // 일반 광고 숨김
+    }
+
+    // 팝업 광고 표시 함수
+    function displayPopupAd() {
+        $("#adPopup").fadeIn(); // 팝업 광고 표시
+    }
+
+    // 팝업 광고 숨김 함수
+    function hidePopupAd() {
+        $("#adPopup").fadeOut(); // 팝업 광고 숨김
+    }
+
+    // 버튼 클릭 이벤트
+    $(document).ready(function () {
+        $("#CheckAds").on("click", function () {
+            const username = $("#username").val(); // 입력한 username 가져오기
+
+            if (!username) {
+                alert("Please enter a username.");
+                return;
+            }
+
+            // 서버에 광고 표시 여부 요청 보내기
+            $.ajax({
+                url: `/api/ads/show`,
+                method: "GET",
+                data: { username: username },
+                success: function (response) {
+                    if (response === true) {
+                        displayAds(); // 일반 광고 표시
+                        fetchPopupAd(username); // 팝업 광고 로드
+                    } else {
+                        removeAds(); // 일반 광고 숨김
+                        hidePopupAd(); // 팝업 광고 로드
+                    }
+                },
+                error: function () {
+                    alert("Failed to check ad status. Defaulting to show ads.");
+                    displayAds(); // 에러 발생 시 기본 광고 표시
+                }
+            });
+        });
+        $("#paymentBtn").on("click", function () {
+            const username = $("#username").val(); // 입력한 username 가져오기
+
+            // 서버에 광고 표시 여부 요청 보내기
+            $.ajax({
+                url: `/kafka/payment`,
+                method: "POST",
+                data: JSON.stringify({"username" : username}),
+                contentType: 'application/json', // Content-Type 헤더 설정
+                success: function (response) {
+                    alert(response);
+                    removeAds(); // 일반 광고 숨김
+                    hidePopupAd(); // 팝업 광고 로드
+                },
+                error: function () {
+                    alert("Failed to check ad status. Defaulting to show ads.");
+
+                    displayAds(); // 에러 발생 시 기본 광고 표시
+                }
+            });
+        });
+
+        // 팝업 광고 데이터 로드
+        function fetchPopupAd(username) {
+            fetch("/api/ads/popup?username=" + username)
+                .then(response => response.json())
+                .then(data => {
+                    // 사용자별 광고 데이트러르 UI에 반영
+                    $("#adImage").attr("src", data.imageUrl);
+                    $("#adTitle").text(data.title);
+                    $("#adContent").text(data.content);
+                    $("#adLink").attr("href", data.link);
+                    displayPopupAd(); // 팝업 광고 표시
+                })
+                .catch(() => {
+                    alert("Failed to load popup ad.");
+                });
+        }
+
+        // 팝업 닫기 버튼
+        $("#closeBtn").on("click", function () {
+            $("#adPopup").fadeOut();
+        });
+    });
+</script>
+</body>
+</html>
